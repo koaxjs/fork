@@ -25,6 +25,7 @@ function taskRunner (dispatch) {
       dispatch(task.run()).then(task.result, task.error)
     }
   })
+  return dispatch
 }
 
 function * fork (fn) {

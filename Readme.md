@@ -61,6 +61,8 @@ Runs tasks. Used internally by koax.
 
 - `dispatch` - dispatch function
 
+**Returns:** `dispatch`
+
 ### task.isRunning()
 
 **Returns:** whether task is running
