@@ -97,7 +97,14 @@ function createTask (fn) {
 
   function cancel () {
     if (isRunning() && _iterator) {
-      _iterator.throw(new Error('TaskCanceled'))
+      try {
+        _iterator.throw(new Error('TaskCanceled'))
+      } catch (err) {
+        if (err.message !== 'TaskCanceled') {
+          throw err
+        }
+      }
+
       return
     }
   }
