@@ -4,7 +4,8 @@
 
 import test from 'tape'
 import {taskRunner, fork, join, cancel} from '../src'
-import bind from '@koax/bind'
+import defaults from '@koax/default'
+import run from '@koax/run'
 import {take, put} from '@koax/channels'
 
 /**
@@ -14,7 +15,7 @@ import {take, put} from '@koax/channels'
 test('should fork generator', (t) => {
   t.plan(3)
 
-  let dispatch = bind()([])
+  let dispatch = run([defaults])
   taskRunner(dispatch)
 
   let finished = false
@@ -42,7 +43,7 @@ test('should fork generator', (t) => {
 
 test('should not drop puts', (t) => {
   t.plan(3)
-  let dispatch = bind()([])
+  let dispatch = run([defaults])
   taskRunner(dispatch)
 
   function * fnA () {
@@ -72,7 +73,7 @@ test('should not drop puts', (t) => {
 test('should join', (t) => {
   t.plan(1)
 
-  let dispatch = bind()([])
+  let dispatch = run([defaults])
   taskRunner(dispatch)
 
   function * child () {
@@ -94,7 +95,7 @@ test('should join', (t) => {
 test('should cancel', (t) => {
   t.plan(1)
 
-  let dispatch = bind()([])
+  let dispatch = run([defaults])
   taskRunner(dispatch)
 
   function * child () {
