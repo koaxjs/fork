@@ -1,0 +1,28 @@
+{
+  "name": "@koax/fork",
+  "description": "Koax support for non blocking async calls.",
+  "repository": "git://github.com/koaxjs/fork.git",
+  "version": "0.1.0",
+  "license": "MIT",
+  "main": "lib/index.js",
+  "scripts": {
+    "prepublish": "make build",
+    "postpublish": "make clean",
+    "postversion": "git push && git push --tags && npm publish --access=public"
+  },
+  "dependencies": {
+    "@f/defer-promise": "^1.0.0",
+    "@f/is-function": "^1.1.1",
+    "@f/is-generator": "^1.3.2",
+    "@f/is-iterator": "^1.0.1",
+    "@koax/channels": "^0.1.1"
+  },
+  "devDependencies": {
+    "@koax/bind": "^0.3.4",
+    "babel-cli": "^6.4.0",
+    "babel-polyfill": "^6.3.13",
+    "babel-preset-es2015": "^6.3.13",
+    "babel-register": "^6.3.13",
+    "tape": "^4.2.2"
+  }
+}
