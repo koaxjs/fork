@@ -6,7 +6,7 @@
 [![NPM version][npm-image]][npm-url]
 [![Code style][standard-image]][standard-url]
 
-Koax support for non blocking async calls.
+Koax support for non blocking async calls. (Included in koax)
 
 ## Installation
 
@@ -15,13 +15,12 @@ Koax support for non blocking async calls.
 ## Usage
 
 ```js
-import koax from 'koax'
-import fork from '@koax/fork'
+import koax, {fork, join, delay} from 'koax'
 
 let dispatch = koax()
 
 function * child () {
-  yield timeout(5)
+  yield delay(5)
   return 'foo'
 }
 
