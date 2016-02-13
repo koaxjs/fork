@@ -2,7 +2,7 @@
   "name": "@koax/fork",
   "description": "Koax support for non blocking async calls.",
   "repository": "git://github.com/koaxjs/fork.git",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "license": "MIT",
   "main": "lib/index.js",
   "scripts": {
