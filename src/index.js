@@ -18,7 +18,7 @@ const TASKS = '@koax/fork/TASKS'
  * fork
  */
 
-function taskRunner (dispatch) {
+function forkDriver (dispatch) {
   dispatch(function * () {
     while (true) {
       let task = yield take(TASKS)
@@ -114,4 +114,4 @@ function createTask (fn) {
  * Exports
  */
 
-export {taskRunner, fork, join, cancel}
+export {forkDriver, fork, join, cancel}

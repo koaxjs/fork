@@ -3,10 +3,10 @@
  */
 
 import test from 'tape'
-import {taskRunner, fork, join, cancel} from '../src'
-import defaults from '@koax/default'
+import {forkDriver, fork, join, cancel} from '../src'
 import run from '@koax/run'
-import {take, put} from '@koax/channels'
+import promise from '@koax/promise'
+import {take, put, channelsEffect} from '@koax/channels'
 
 /**
  * Tests
@@ -15,8 +15,7 @@ import {take, put} from '@koax/channels'
 test('should fork generator', (t) => {
   t.plan(3)
 
-  let dispatch = run([defaults])
-  taskRunner(dispatch)
+  let dispatch = forkDriver(run([promise, channelsEffect()]))
 
   let finished = false
 
@@ -43,8 +42,7 @@ test('should fork generator', (t) => {
 
 test('should not drop puts', (t) => {
   t.plan(3)
-  let dispatch = run([defaults])
-  taskRunner(dispatch)
+  let dispatch = forkDriver(run([promise, channelsEffect()]))
 
   function * fnA () {
     while (true) {
@@ -73,8 +71,7 @@ test('should not drop puts', (t) => {
 test('should join', (t) => {
   t.plan(1)
 
-  let dispatch = run([defaults])
-  taskRunner(dispatch)
+  let dispatch = forkDriver(run([promise, channelsEffect()]))
 
   function * child () {
     return yield new Promise(function (resolve) {
@@ -95,8 +92,7 @@ test('should join', (t) => {
 test('should cancel', (t) => {
   t.plan(1)
 
-  let dispatch = run([defaults])
-  taskRunner(dispatch)
+  let dispatch = forkDriver(run([promise, channelsEffect()]))
 
   function * child () {
     try {
