@@ -3,10 +3,13 @@
  */
 
 import test from 'tape'
-import {forkDriver, fork, join, cancel} from '../src'
+import {forkEffect, fork, join, cancel, BOOT} from '../src'
+
+import channel from '@f/channel'
+import boot from '@koax/boot'
 import run from '@koax/run'
 import promise from '@koax/promise'
-import {take, put, channelsEffect} from '@koax/channels'
+import compose from '@koax/compose'
 
 /**
  * Tests
@@ -15,7 +18,7 @@ import {take, put, channelsEffect} from '@koax/channels'
 test('should fork generator', (t) => {
   t.plan(3)
 
-  let dispatch = forkDriver(run([promise, channelsEffect()]))
+  let dispatch = createDispatch()
 
   let finished = false
 
@@ -37,41 +40,40 @@ test('should fork generator', (t) => {
     t.equal(val, 'woot')
     finished = true
   })
-
 })
 
 test('should not drop puts', (t) => {
   t.plan(3)
-  let dispatch = forkDriver(run([promise, channelsEffect()]))
+  let dispatch = createDispatch()
+  let {take, put} = channel()
 
   function * fnA () {
     while (true) {
-      let res = yield take('a')
+      let res = yield take()
       yield fork(someAction(res))
     }
   }
 
   function * fnB () {
-    yield put('a', 1)
-    yield put('a', 2)
-    yield put('a', 3)
+    yield put(1)
+    yield put(2)
+    yield put(3)
   }
 
   let count = 1
-  function * someAction(res) {
+  function * someAction (res) {
     t.equal(res, count++)
   }
 
   dispatch(function * () {
     yield [fork(fnA), fork(fnB)]
   })
-
 })
 
 test('should join', (t) => {
   t.plan(1)
 
-  let dispatch = forkDriver(run([promise, channelsEffect()]))
+  let dispatch = createDispatch()
 
   function * child () {
     return yield new Promise(function (resolve) {
@@ -86,13 +88,12 @@ test('should join', (t) => {
     const result = yield join(task)
     t.equal(result, 'foo')
   })
-
 })
 
 test('should cancel', (t) => {
   t.plan(1)
 
-  let dispatch = forkDriver(run([promise, channelsEffect()]))
+  let dispatch = createDispatch()
 
   function * child () {
     try {
@@ -104,13 +105,17 @@ test('should cancel', (t) => {
     } catch (err) {
       t.equal(err.message, 'TaskCanceled')
     }
-
   }
 
   dispatch(function * () {
     const task = yield fork(child)
     yield cancel(task)
-    t.equal(result, 'bar')
   })
-
 })
+
+function createDispatch () {
+  let ctx = {}
+  let dispatch = ctx.dispatch = run(compose([promise, forkEffect(ctx)]))
+  dispatch(boot())
+  return dispatch
+}

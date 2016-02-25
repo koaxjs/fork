@@ -2,48 +2,80 @@
  * Imports
  */
 
-import {put, take} from '@koax/channels'
+import channel from '@f/channel'
 import defer from '@f/defer-promise'
 import isGenerator from '@f/is-generator'
 import isIterator from '@f/is-iterator'
 import isFunction from '@f/is-function'
+import {BOOT} from '@koax/boot'
 
 /**
  * Channel
  */
 
-const TASKS = '@koax/fork/TASKS'
+const FORK = '@koax/fork/FORK'
+const JOIN = '@koax/fork/JOIN'
+const CANCEL = '@koax/fork/CANCEL'
 
 /**
  * fork
  */
 
-function forkDriver (dispatch) {
+function forkEffect (app) {
+  let {take, put} = channel()
+  return function * (action, next) {
+    switch (action.type) {
+      case BOOT:
+        forkDriver(app.dispatch || app, take)
+        return next()
+      case FORK:
+        return yield forkHandler(put, action.payload)
+      case JOIN:
+        return joinHandler(action.payload)
+      case CANCEL:
+        return cancelHandler(action.payload)
+    }
+    return next()
+  }
+}
+
+function forkDriver (dispatch, take) {
   dispatch(function * () {
     while (true) {
-      let task = yield take(TASKS)
+      let task = yield take()
       dispatch(task.run()).then(task.result, task.error)
     }
   })
-  return dispatch
 }
 
-function * fork (fn) {
+function * forkHandler (put, fn) {
   let task = createTask(fn)
-  yield put(TASKS, task)
+  yield put(task)
   return task
 }
 
-function join (task) {
+function fork (fn) {
+  return {type: FORK, payload: fn}
+}
+
+function joinHandler (task) {
   return task.done
 }
 
-function cancel (task) {
+function join (task) {
+  return {type: JOIN, payload: task}
+}
+
+function cancelHandler (task) {
   return task.cancel()
 }
 
+function cancel (task) {
+  return {type: CANCEL, payload: task}
+}
+
 function createTask (fn) {
-  if (! (isGenerator(fn) || isIterator(fn) || isFunction(fn))) {
+  if (!(isGenerator(fn) || isIterator(fn) || isFunction(fn))) {
     throw new Error('Task must be a function, a generator, or an iterator.')
   }
 
@@ -114,4 +146,4 @@ function createTask (fn) {
  * Exports
  */
 
-export {forkDriver, fork, join, cancel}
+export {forkEffect, fork, join, cancel, BOOT}
