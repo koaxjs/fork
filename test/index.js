@@ -40,6 +40,7 @@ test('should fork generator', (t) => {
     t.equal(val, 'woot')
     finished = true
   })
+
 })
 
 test('should not drop puts', (t) => {
@@ -115,7 +116,5 @@ test('should cancel', (t) => {
 
 function createDispatch () {
   let ctx = {}
-  let dispatch = ctx.dispatch = run(compose([promise, forkEffect(ctx)]))
-  dispatch(boot())
-  return dispatch
+  return ctx.dispatch = run(compose([promise, forkEffect(ctx)]))
 }

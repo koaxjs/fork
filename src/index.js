@@ -7,7 +7,6 @@ import defer from '@f/defer-promise'
 import isGenerator from '@f/is-generator'
 import isIterator from '@f/is-iterator'
 import isFunction from '@f/is-function'
-import {BOOT} from '@koax/boot'
 
 /**
  * Channel
@@ -21,15 +20,11 @@ const CANCEL = '@koax/fork/CANCEL'
  * fork
  */
 
-function forkEffect (app) {
-  let {take, put} = channel()
+function forkEffect (interpret) {
   return function * (action, next) {
     switch (action.type) {
-      case BOOT:
-        forkDriver(app.dispatch || app, take)
-        return next()
       case FORK:
-        return yield forkHandler(put, action.payload)
+        return forkHandler(interpret.dispatch || interpret, action.payload)
       case JOIN:
         return joinHandler(action.payload)
       case CANCEL:
@@ -39,18 +34,9 @@ function forkEffect (app) {
   }
 }
 
-function forkDriver (dispatch, take) {
-  dispatch(function * () {
-    while (true) {
-      let task = yield take()
-      dispatch(task.run()).then(task.result, task.error)
-    }
-  })
-}
-
-function * forkHandler (put, fn) {
+function * forkHandler (interpret, fn) {
   let task = createTask(fn)
-  yield put(task)
+  interpret(task.run()).then(task.result, task.error)
   return task
 }
 
@@ -146,4 +132,4 @@ function createTask (fn) {
  * Exports
  */
 
-export {forkEffect, fork, join, cancel, BOOT}
+export {forkEffect, fork, join, cancel}
